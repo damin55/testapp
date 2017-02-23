@@ -12,6 +12,7 @@ module.controller('AppController', [function() {
         loginuser(storage_login, storage_password, 1, permissions);
         createDB();
     });
+    
 }]);
  
 //module.controller('AppController', function($scope) { });
