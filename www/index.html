@@ -1,0 +1,754 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <script src="components/loader.js"></script> 
+    
+    <!-- angular 1.5.8 -->
+    <script src="components/angular.js"></script>
+    <script src="components/angular-route.js"></script>
+    <script src="components/angular-animate.js"></script>
+    
+    <!-- angular lightbox -->
+    <script src="angular_image/angular-bootstrap-lightbox.js"></script>
+    <script src="components/ui-bootstrap-tpls-1.3.2.js"></script>
+   
+    
+    <!-- angular my code -->
+    <script src="components/angular-my-code.js"></script>
+ 
+    <!-- onsen angular -->
+    <script src="lib/onsenui/js/onsenui.min.js"></script>
+    <script src="lib/onsenui/js/angular-onsenui.js"></script>
+
+    <!-- JQuery --> 
+    <script src="components/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    
+    <!-- CSS styles -->
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsenui.css">
+    <link rel="stylesheet" href="lib/onsenui/css/onsen-css-components.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="angular_image/angular-bootstrap-lightbox.css">
+  
+    <!-- --------------- Kod aplikacji --------------- -->
+    <script type="text/javascript" src="components/email.min.js"></script>
+    <script type="text/javascript">
+    (function(){
+        emailjs.init("user_n6qUt5Q9clWJks9sNKr6D");
+    })();
+    </script>
+
+    <script src="components/mycode.js"></script>
+    <script src="components/mycode_zapis.js"></script>
+    <script src="components/angular-my-code.js"></script>
+
+</head>
+<body ng-app="my-app" ng-controller="AppController">
+ 
+ 
+<ons-sliding-menu main-page="login.html" menu-page="menu.html" side="left" max-slide-distance="250px" var="menu">
+</ons-sliding-menu>
+
+<!-- Błąd -->
+<ons-template id="login_failed.html">
+  <ons-dialog id="login_failed" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-locked"></ons-icon>&nbsp;Błąd
+        </div>
+      </ons-toolbar>
+        <div style="text-align: center; margin: 5px;">
+			<br /> Wprowadzono błędne dane lub brak połączenia z siecią. Spróbuj ponownie. <br />
+			<p><ons-button onclick="hideDialog('login_failed')" style="width: 200px;" > OK </ons-button></p>
+		</div>
+  </ons-dialog>        
+</ons-template>
+
+<!-- type mail -->
+<ons-template id="type_mail.html">
+  <ons-dialog id="type_mail" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-email-outline"></ons-icon>&nbsp; Wyślij mail
+        </div>
+      </ons-toolbar>
+        <div style="text-align: center; margin: 5px;">
+			Wprowadź adres email: <br />
+                <ons-input id="typed_email" type="email" placeholder="e-mail adress" class="text-input--underbar" style="margin-top:8px; width: 200px;" required></ons-input>
+                <br /><br />
+                <ons-button onclick="typed_mail_val()" style="width: 200px;">Utwórz wiadomość</ons-button>
+                <br/><br/>
+                <ons-button onclick="hideDialog('type_mail')" style="width: 200px;" >Anuluj</ons-button>
+		</div>
+  </ons-dialog>        
+</ons-template>
+
+<ons-template id="mail_alert2.html">
+  <ons-dialog id="mail_alert2" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-locked"></ons-icon>&nbsp;Błąd
+        </div>
+      </ons-toolbar>
+        <div style="text-align: center; margin: 5px;">
+			<br /> Zaznaczyłeś powiadomienie dla którego nie uzupelniłeś ceny i/lub nazwy/EAN konkurenta - popraw dane ! <br />
+			<p><ons-button onclick="hideDialog('mail_alert2')" style="width: 200px;" > OK </ons-button></p>
+		</div>
+  </ons-dialog>        
+</ons-template>
+
+<ons-template id="sure.html">
+  <ons-dialog id="sure" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-locked"></ons-icon>&nbsp;Błąd
+        </div>
+      </ons-toolbar>
+        <div style="text-align: center; margin: 5px;">
+    		<br /> Czy jestes pewny ze chcesz dokonac edycji ? <br />
+			<p><ons-button onclick="hideDialog('sure')" style="width: 200px;" > Anuluj </ons-button></p>
+            <p><ons-button onclick="update_answer_in_base()" style="width: 200px;" > Tak </ons-button></p>
+		</div>
+  </ons-dialog>        
+</ons-template>
+
+<ons-modal id="modal" var="modal">
+    <ons-icon icon="ion-load-c" spin="true"></ons-icon>
+		<br>
+		<br> Proszę czekać
+		<br> 
+</ons-modal>
+
+
+<!-- Komunikat - Zapis udany-->
+<ons-template id="successfull.html">
+  <ons-dialog id="successfull" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-thumbsup"></ons-icon>&nbsp; Zapis
+        </div>
+      </ons-toolbar>
+    
+      <div style="text-align: center; margin: 5px;">
+      <br />
+      Dane pomyślnie zapisane. 
+		<p>
+		<br />
+          <ons-button onclick="hideDialog('successfull')" style="width: 200px;" > Ok </ons-button>
+        </p>
+      </div>
+  </ons-dialog>        
+</ons-template>
+<!-- /Koniec - Komunikat - Zapis udany-->
+
+<!-- Komunikat - Wybor hurtowni na podstawie GPS-->
+<ons-template id="gps.html">
+  <ons-dialog id="gps" var="dialog" animation="default" modifier="material" >
+      <ons-toolbar inline>
+        <div id="miasto" class="center"> <ons-icon icon="ion-ios-location"></ons-icon>&nbsp; Jesteś w {{msg}}</div> 
+      </ons-toolbar>
+      <div style="text-align: center">
+       <ons-list style="text-align: center; width: 100%; height: 300px; overflow-y: scroll" class="mydiv"></ons-list>
+        <p><hr></hr>
+          <ons-button onclick="manual_choice_dialog()"> <ons-icon icon="ion-ios-search-strong"></ons-icon>&nbsp; Wybierz recznie</ons-button>
+        </p>
+      </div>
+
+  </ons-dialog>        
+</ons-template>
+
+<!-- Komunikat - Wybor reczny-->
+<ons-template id="manual_choice.html">
+  <ons-dialog id="manual_choice" var="dialog" animation="none">
+    <ons-toolbar inline>
+      <div class="center">
+          <ons-icon icon="ion-map"></ons-icon> Wybierz ręcznie
+       </div> 
+    </ons-toolbar>
+    <div style="text-align: center">  
+		<ons-icon icon="ion-android-arrow-dropright"></ons-icon>&nbsp; Wybierz miasto: <br /> <select class="myOptions" id="myOptions" style="width: 250px; "></select>
+			<br />
+		<ons-icon icon="ion-android-arrow-dropright"></ons-icon>&nbsp; Wybierz hurtownię: <br /> <select class="myOptions2" id="myOptions2" style="width: 250px; " ></select>
+			<br />	 
+		<ons-icon icon="ion-android-arrow-dropright"></ons-icon>&nbsp; Wybierz ulicę: <br /> <select class="myOptions3" id="myOptions3" style="width: 250px;"></select>
+        <div id="wholesale_id" style="display: none;"></div><hr></hr>
+        <p><ons-button id="wholesale_manual" onclick="confirm_choice()" >OK</ons-button></p>
+    </div>
+  </ons-dialog>        
+</ons-template>
+<!-- Komunikat - hurtownia odwiedzona w przeciagu 30 dni-->
+<ons-template id="komunikat_hurtownia.html">
+  <ons-dialog id="komunikat_hurtownia" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-information"></ons-icon>&nbsp; Uwaga
+        </div>
+      </ons-toolbar>
+    
+      <div style="text-align: center; margin: 5px;">
+      
+      Hurtownia została odwiedzona w przeciągu 30 dni <br /> przeprowadzenie ankiety nie jest wymagane. 
+        
+        <p>
+          <ons-button onclick="hideDialog('komunikat_hurtownia')" style="width: 200px;"> Wypełnij mimo to </ons-button>
+        </p>
+		<p>
+          <ons-button onclick="closeAndgoMain()" style="width: 200px;" > Wyjdź z ankiety </ons-button>
+        </p>
+      </div>
+  </ons-dialog>        
+</ons-template>
+<!-- /Koniec komunikatu - hurtownia odwiedzona w przeciagu 30 dni-->
+<!-- Zdjecie wybierz rodzaj-->
+<ons-template id="photo_choice.html">
+  <ons-dialog id="photo_choice" var="dialog" animation="default">
+      <ons-toolbar inline>
+        <div class="center">
+           <ons-icon icon="ion-ios-information"></ons-icon>&nbsp; Wybierz odpowiednią opcję
+        </div>
+      </ons-toolbar>
+    	<div style="text-align: center; margin: 5px;">
+			<br /> Jakiego typu zdjęcie? <br />
+			<p><ons-button onclick="type_polka()" style="width: 200px;"><ons-icon icon="ion-ios-cart-outline"></ons-icon>&nbsp; Półka </ons-button></p>
+			<p><ons-button onclick="type_oddzial()" style="width: 200px;" ><ons-icon icon="ion-ios-pricetags-outline"></ons-icon>&nbsp; Oddział </ons-button></p>
+		</div>
+  </ons-dialog>        
+</ons-template>
+
+
+<!-- ******************************************************************  LOGOWANIE   ***************************************************************-->
+<ons-template id="login.html">
+    <ons-page>
+   
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">kontakt - damian.reszuta@philips.com </div>
+        </ons-toolbar>
+
+    	<div class="center2">
+			<h3>Logowanie </h3>			
+				<ons-input id="login1" type="email" placeholder="e-mail adress" class="text-input--underbar width-full" style="margin-top:8px; width: 100%;" required></ons-input>
+				<br /> <br />
+				<ons-input id="haslo1" type="password" placeholder="password" class="text-input--underbar width-full" style="margin-top:8px; width: 100%;" input pattern=".{6,}" required></ons-input>
+				<br /> <br />
+				<ons-button id="login" modifier="chevron" class="btn_large_moj" modifier="large" onclick="loginuser()"><ons-icon icon="ion-power"></ons-icon> Zaloguj </ons-button>	
+		</div>
+    </ons-page>
+</ons-template>
+
+<!-- ***************************************************Centrum ankiet******************************************************************************* -->
+<ons-template id="admin.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Rozpocznij wizytę</div>
+        </ons-toolbar>
+    		<div class="center4">
+					<div class="alert alert-warning" role="alert">
+						<h6>&nbsp; Proszę o szczegółowe wypełnianie ankiety <br /> Badanie obejmuje oddziały typu A i B <br /> Braki oddziałów proszę zgłosić mailowo - damian.reszuta@philips.com<h6>
+					</div>
+				<ons-button class="btn_large_moj" modifier="large--cta" onclick="pokaz_wybrana_ankiete()"> <ons-icon icon="ion-ios-lightbulb"> Start Wizyty </ons-button>
+                <br />
+				<div class="lista_ankiet"></div>
+			</div>	
+    </ons-page>
+</ons-template>
+<!-- ***************************************************ankieta********************************************************************* -->
+<ons-template id="ankieta_1.html">
+    <ons-page>
+        <ons-toolbar>
+    		<div class="left">
+                    <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                    </ons-toolbar-button>
+            </div>
+            <div class="center">MERCHANDISING</div>
+        </ons-toolbar>
+		<div class="center4">
+		    <div class="center2">
+				<div id="localize_me"><ons-icon icon="ion-ios-location"></ons-icon></div>
+				<hr></hr>
+            </div>
+            
+				<div id="wrapper" style="text-align: center">
+                
+					<div class="header_questions" style="display: inline-block; text-align: center; width: 100%"></div>
+				 </div>	
+                    <div class="questions" style="display: inline-block; text-align: left;"></div>
+					<ons-button class="btn_large_moj" modifier="large--cta" onclick="validate_form()" style="display: inline-block;"> <ons-icon icon="ion-ios-redo-outline"></ons-icon>  Zapisz i przejdź dalej</ons-button>	
+			</div>
+		</div>	
+    </ons-page>
+</ons-template>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<!-- ****** MENU ********-->
+<ons-template id="menu.html">
+<ons-page modifier="menu-page">
+        <ons-toolbar modifier="transparent">
+          <div class="right">
+            <ons-toolbar-button class="menu-closeMenu" ng-click="menu.closeMenu()">
+              <ons-icon icon="ion-ios-undo"></ons-icon>
+            </ons-toolbar-button>
+          </div>
+        </ons-toolbar>
+<div id="menu_glowne">
+  <ons-list class="menu-list">
+    <ons-list-item class="menu-item" onclick="menu.setMainPage('login.html', {closeMenu: true})">
+      <ons-icon icon="ion-power"></ons-icon>
+     Logowanie
+    </ons-list-item>
+  </ons-list>
+  </div>
+  </ons-page>
+</ons-template>
+<!-- ***************************************************ankieta2********************************************************************* -->
+<ons-template id="ankieta_2.html">
+    <ons-page>
+        <ons-toolbar>
+        	<div class="left">
+                    <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                    </ons-toolbar-button>
+            </div>
+            <div class="center">MATERIAŁY POS</div>
+        </ons-toolbar>
+		<div class="center4">
+				<div id="wrapper" style="text-align: center">   
+					<div class="header_questions2" style="display: inline-block; text-align: center; width: 100%"></div>
+					<div class="questions2" style="display: inline-block; text-align: left;"></div>
+                <br /><br />
+                   <button type="button"class="btn btn-warning btn-lg btn-block" onclick="show_communicate()"><ons-icon icon="ion-ios-camera-outline" class="ons-icon ons-icon--ion ion-ios-camera-outline"></ons-icon> Zrób zdjęcie</button>
+                 <br /><br />
+					<button class="btn btn-danger btn-lg btn-block"  onclick="save_marketing_poll()" style="display: inline-block;"> <ons-icon icon="ion-ios-paperplane"></ons-icon> Zakończ </button>	
+			</div>
+		</div>	
+    </ons-page>
+</ons-template>
+<!-- ***************************************************Koniec********************************************************************* -->
+<ons-template id="result.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+                    <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                    </ons-toolbar-button>
+            </div>
+            <div class="center">Koniec</div>
+        </ons-toolbar>
+		<div class="center4">
+				<h3 id="headertag" >Do następnej wizyty !</h3>
+					<button class="btn btn-danger btn-lg btn-block"  onclick="menu.setMainPage('admin.html', {closeMenu: true});" style="display: inline-block;"> <ons-icon icon="ion-ios-flag-outline"></ons-icon> Nowa wizyta </button>	
+			</div>
+		</div>	
+    </ons-page>
+</ons-template>
+
+<!-- ***************************************************Kreator ankiet ***************************************************************************************** -->
+<ons-template id="create_poll.html">
+    <ons-page id="my-page" ng-controller="PageController2">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Utwórz ankiete</div>
+        </ons-toolbar>   
+        <div style="margin-left: 20px; margin-right: 20px;">
+       
+      
+			<ons-list>
+            <ons-list-header style="font-size: 18px;" ><ons-icon icon="ion-person-stalker"></ons-icon>&nbsp;<b>Wybierz RTAM</b></ons-list-header>
+            
+            
+            <div class="row">
+                <div class="col-md-2">
+                    <span class="input-group-addon" style="border: 0; background-color: #f9f9f9;">
+                        <ons-input style="margin: 0;" onclick="select_RTAM()" id="select_RTAM" type="checkbox"  />
+                        <label style="margin: 0;" for="select_RTAM">Wybierz RTAM'a: </label>
+                    </span>
+                </div> 
+                <div class="col-md-10">
+                    <select class="select_RTAM_options" id="select_RTAM_options" style="width: 100%; height: 50px;"></select>
+                </div>
+            </div>
+           
+            
+				<ons-list-header style="font-size: 18px;" ><ons-icon icon="ion-ios-compose-outline"></ons-icon>&nbsp;<b>Podaj unikalną nazwę ankiety</b></ons-list-header>
+					<input id="pollname"  type="text" class="text-input--underbar width-full" placeholder="Wpisz nazwe ankiety" style="margin-top:8px; width: 100%;" required>
+					<br />
+				<ons-list-header style="font-size: 18px;"><ons-icon icon="ion-help"></ons-icon>&nbsp; <b>Wpisz opis ankiety: </b><span id="clicks">1</span></ons-list-header>
+				<div id="question_1">
+					<input id="question1"  type="text" class="text-input--underbar width-full" placeholder="Opis - wpisz treść" style="margin-top:8px; width: 100%;" required>
+				</div>
+				<ons-list-header style="font-size: 18px;" ><ons-icon icon="ion-settings"></ons-icon>&nbsp;<b>Opcje</b></ons-list-header>
+				<p>  
+					<label class="label">Wybierz rodzaj pola:</label>   
+					<select class="dropdown" id="choice_field">
+                        <option value="Pytanie1" selected="selected">Pytanie1</option>
+						<option value="dostepnosc">dostepnosc</option>
+						<option value="TAK/NIE">TAK/NIE</option>
+						<option value="cena_dostepnosc">cena_dostepnosc</option>
+						
+					</select>
+					<ons-button onclick="create_html_element()"><ons-icon icon="ion-plus-round"></ons-icon> Add</ons-button>
+					<ons-button onclick="removeElement()"><ons-icon icon="ion-ios-minus-empty"></ons-icon> Remove</ons-button>
+				</p> 
+				<p ng-show="showme"> </p>
+                <ons-input id="username" style="margin-left: 20px; margin-right: 10px;" modifier="underbar" placeholder="nazwa produktu" ng-model="name"></ons-input><ons-button ng-click="SetText()">Ustaw tresc w Moj Text</ons-button>
+				<div id="form-element" style="text-align: left;"></div>		
+			</ons-list>
+				<br /><br />
+				<ons-button class="btn_large_moj" modifier="large--cta" onclick="create_form()">Zapisz ankiete</ons-button>
+				<ons-list-item>
+					<br />
+					<h2 style="text-align: center; width:100%;">Podgląd ankiety:</h2>
+					<div id="showelements" style="text-align: left;"><ons-list class="rows_class"></ons-list></div>
+				</ons-list-item>
+		</div>	
+    </ons-page>
+</ons-template>
+<!-- ***************************************************Edit center ******************************************************************************* -->
+<ons-template id="list_edit_poll.html">
+    <ons-page ng-controller="EditCard">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Podgląd/Edycja ankiet </div>
+        </ons-toolbar>
+    	<div class="center2">	
+			<h3> Aktualne ankiety które możesz edytować/podglądać: </h3>
+			<div class="alert alert-warning" role="alert">
+			<h6>Możesz edytować ankiety jedynie przez 7 dni od daty zapisu <br /> Brak możliwości zmiany lokalizacji wypełniania<h6>
+			</div>
+			<div class="lista_ankiet"></div>
+            <div ng-repeat="row in myData">
+                <button type="button" class="btn btn-default btn-block" onclick="editpoll(this.id, this.value)"  ng-attr-id="{{row.hurtownia_id}}" ng-value="row.poll_id" >{{row.hurtownia_nazwa}} &nbsp| &nbsp{{row.hurtownia_miasto}} &nbsp|&nbsp {{row.hurtownia_ulica}}&nbsp|&nbsp{{row.date_add}}</button>
+            </div>
+		</div>
+    </ons-page>
+</ons-template>
+<!-- ***************************************************Raport dla Adama **************************************************************************** -->
+<ons-template id="raport_wypelniania.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center"> Raport wypełniania ankiety </div>
+		</ons-toolbar>
+		<div class="center2">
+	 `		<h3>Raport dot. wypełniania ankiet</h3>
+			<div class="form-row">
+				<b> Wpisz datę - od (mm/dd/yyyy)</b><br />
+					<input id="time_from" class="text-input--underbar width-full" placeholder="np 01/01/2000" style="margin-top:8px; width: 100%;" required>
+			</div>
+			<br /><br />
+		<ons-button id="insert" class="btn_large_moj" modifier="large" onclick="show_report()">Wygeneruj raport</ons-button>
+			<br />
+		<table class="table" id="myTable"></table>
+		</div>
+	</ons-page>
+</ons-template>
+<!-- ***************************************************Filmy promocyjne **************************************************************************** -->
+<ons-template id="baza_wiedzy.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center"> Filmy promocyjne </div>
+    	</ons-toolbar>
+		<div class="center2">
+        <button type="button" onclick="window.open('https://www.youtube.com/watch?v=OxjIqtzxXrI&list=PLj9hU1O4UB03uLzmpmrYX3STZ2L1RLOIp&index=33', '_system', 'location=yes')" class="btn btn-primary btn-block">Zobacz filmy</button>  
+        <table class="table" id="myTable"></table>
+		</div>
+	</ons-page>
+</ons-template>
+<!-- ***************************************************Baza promocji **************************************************************************** -->
+<ons-template id="baza_promo.html">
+    <ons-page ng-controller="PromotionCard">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center"> Lista promocji </div>
+        </ons-toolbar>
+		<div class="center2">
+        <h2>Lista promocji: </h2>
+	 <div id="list_pdf2"></div>
+		</div>
+	</ons-page>
+</ons-template>
+<!-- ***************************************************Baza produktów **************************************************************************** -->
+<ons-template id="baza_prod.html">
+    <ons-page ng-controller="KnowledgeCard">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center"> Lista produktow </div>
+        </ons-toolbar>
+    	<div class="center2">
+        <h2>Katalogi </h2>
+       <div id="list_pdf"></div>
+		</div>
+	</ons-page>
+</ons-template>
+<!-- ***************************************************Edit/show******************************************************************************* -->
+	
+	<ons-template id="edit_poll.html">
+    <ons-page>
+            <ons-toolbar>
+                <div class="left">
+                    <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                    </ons-toolbar-button>
+                </div>
+                <div class="center">Edytuj ankietę:</div>
+            </ons-toolbar>
+
+		<div class="center2">
+<div class="center3">
+<div id ="state"><ons-icon icon="ion-ios-locked"></ons-icon> Włącz Edycję</div>
+  <ons-switch onchange="edit_state()" id="EditSwitch"></ons-switch>
+<hr></hr>
+<div id="wrapper" style="text-align: center">   
+<div class="header_questions" style="display: inline-block; text-align: center; width: 100%"></div>
+
+<div class="questions" style="display: inline-block; text-align: left;"></div>
+<button class="button button--large" onclick="window_new()" id="UpdateBtn"><ons-icon icon="ion-ios-compose-outline"></ons-icon> Zaktualizuj odpowiedzi</button>		
+</div>
+</div>	
+</div>		
+    </ons-page>
+</ons-template>
+<!-- ***************************************************Client card******************************************************************************* -->
+    
+	<ons-template id="client_card.html">
+    <ons-page ng-controller="ClientCard">
+            <ons-toolbar>
+                <div class="left">
+                    <ons-toolbar-button ng-click="menu.toggle()">
+                        <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                    </ons-toolbar-button>
+                </div>
+                <div class="center">Dane dotyczące klienta:</div>
+            </ons-toolbar>
+
+
+<div class="center2">
+    <div class="center3">
+        <div ng-repeat="row in myData">
+        <form>
+            <div class="form-group">
+                <label for="name_surname_wholesale"><ons-icon icon="ion-ios-person"></ons-icon> Imię i nazwisko osoby kontaktowej: </label>
+                <input type="text" class="form-control" id="person" placeholder=" (imię, nazwisko)" ng-model="row.imie_nazwisko_osoby_kontaktowej">
+            </div>
+            <div class="form-group">
+                <label for="mail_wholesale"><ons-icon icon="ion-ios-at"></ons-icon> Adres email osoby kontaktowej: </label>
+                <input type="email" class="form-control" id="email_wholesale"" aria-describedby="emailHelp" placeholder="email np. jan.kowalski@hurtownia-nazwa-xyz.pl" ng-model="row.hurtownia_mail">
+            </div>
+            <div class="form-group">
+                <label for="tel_wholesale"><ons-icon icon="ion-ios-telephone"></ons-icon> Telefon do oddziału: </label>
+                <input type="tel" class="form-control" id="tel_wholesale" placeholder="telefon np.600-600-600" ng-model="row.hurtownia_tel">
+            </div>
+            <div class="form-group">
+                <label for="tel_person_wholesale"><ons-icon icon="ion-ios-telephone"></ons-icon> Telefon do osoby kontaktowej: </label>
+                <input type="tel" class="form-control" id="tel_person_wholesale" placeholder="telefon np.600-600-600" ng-model="row.telefon_do_osoby_kontaktowej">
+            </div>
+            <div class="form-group">
+                <label for="address_wholesale"><ons-icon icon="ion-ios-location"></ons-icon> Adres oddziału: </label>
+                <input type="text" disabled="true" class="form-control" id="address_wholesale" placeholder="wpisz adres" ng-value="row.hurtownia_miasto + ' ' + row.hurtownia_adres">  
+            </div>
+            <div class="form-group">
+                <label for="select1_wholesale"><ons-icon icon="ion-ios-star"></ons-icon> Klasyfikacja oddziału wg RTAM: </label>
+                <select class="form-control" id="select1_wholesale">
+                    <option ng-selected="selected" ng-model="row.hurtownia_klasyfikacja">{{row.hurtownia_klasyfikacja}}</option>
+                    <option>A</option>
+                    <option>B</option>
+                    <option>C</option>
+                </select>
+             </div>
+            <div class="form-group">
+                <label for="select2_wholesale"><ons-icon icon="ion-ios-bookmarks"></ons-icon> Rodzaj kontaktu: </label>
+                <select class="form-control" id="select2_wholesale">
+                    <option ng-selected="selected" ng-model="row.typ_kontaktu">{{row.typ_kontaktu}}</option>
+                    <option>właściciel</option>
+                    <option>dyrektor</option>
+                    <option>kierownik</option>
+                    <option>sprzedawca</option>
+                    <option>inne</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="count_wholesale"><ons-icon icon="ion-ios-people"></ons-icon> Ilość zatrudnionych sprzedawców w salonie </label>
+                <input type="text" class="form-control" id="count_wholesale" placeholder="np. 2" ng-model="row.ilosc_sprzedawcow">
+            </div>
+            <div class="form-group">
+                <label for="count2_wholesale"><ons-icon icon="ion-ios-timer"></ons-icon> Ilosc wizyt w miesiacu: </label>
+                <input type="text" class="form-control" id="count2_wholesale" placeholder="np. 0.5" ng-model="row.ilosc_wizyt_msc">
+            </div>
+            <div class="form-group">
+                <label for="telemarketing_wholesale"><ons-icon icon="ion-ios-mic"></ons-icon> Telemarketing: </label>
+                <select class="form-control" id="telemarketing_wholesale" ng-model="row.telemarketing">
+                    <option ng-selected="selected" ng-model="row.telemarketing">{{row.telemarketing}}</option>
+                    <option>NIE</option>
+                    <option>TAK</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="contact_person_telemarketing_wholesale"><ons-icon icon="ion-ios-body"></ons-icon> Osoba do kontaktu dla telemarketera</label>
+                <input type="text" class="form-control" id="contact_person_telemarketing_wholesale" placeholder="(imię, nazwisko)" ng-model="row.osoba_do_kontaktu_telemarketera">
+            </div>
+            <div class="form-group">
+                <label for="tel_telemarketing_wholesale"><ons-icon icon="ion-ios-telephone-outline"></ons-icon> Numer telefonu osoby do kontaktu telemarketera</label>
+                <input type="tel" class="form-control" id="tel_telemarketing_wholesale" placeholder="telefon np.600-600-600" ng-model="row.numer_osoby_do_kontaktu">
+            </div>
+        </form>  
+        <button class="button button--large" ng-click="update_client_card(row.imie_nazwisko_osoby_kontaktowej,row.hurtownia_mail, row.hurtownia_tel, row.telefon_do_osoby_kontaktowej, row.hurtownia_klasyfikacja, row.typ_kontaktu, row.ilosc_sprzedawcow, row.ilosc_wizyt_msc, row.telemarketing, row.osoba_do_kontaktu_telemarketera, row.numer_osoby_do_kontaktu)" id="UpdateBtn"><ons-icon icon="ion-ios-gear-outline"></ons-icon> Zaktualizuj dane</button>		
+        </div>
+    </div>
+</div>	
+</ons-page>
+</ons-template>
+<!-- ***************************************************rejestracja ************************************************************************************************ -->
+<ons-template id="register.html">
+    <ons-page>
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Rejestracja</div>
+    	</ons-toolbar>
+	<div class="center2">
+			<h3>Zarejestruj użytkownika <small>*</small></h3>
+			<b>* do prawidłowej rejestracji wszystkie pola muszą zostać uzupełnione</b>
+		<div class="form-row">
+			<input id="login1"  type="email" class="text-input--underbar width-full" placeholder="*PHILIPS Email" style="margin-top:8px; width: 100%;" required>
+		</div>
+		<div class="form-row">
+			<input id="haslo1" type="password" placeholder="*Your Password" class="text-input--underbar width-full" style="margin-top:8px; width: 100%;" input pattern=".{6,}" required>
+		</div>  
+		<div class="form-row">
+			<input type="text" id="nadaj_imie" class="text-input--underbar width-half" placeholder="*Imie" input pattern=".{2,}" value="" required>
+			<input type="text" id="nadaj_nazwisko"class="text-input--underbar width-half" placeholder="*Nazwisko" value="" style="border-width-left: 1px" input pattern=".{2,}" required>
+		</div>
+	
+
+        <ons-list>
+    <ons-list-header>*Uprawnienia:</ons-list-header>
+    <ons-list-item tappable>
+      <label class="left">
+        <ons-input name="color"  id="state1" type="radio" name="level" type="radio" input-id="radio-1" checked></ons-input>
+      </label>
+      <label for="radio-1" class="center">
+        KAM
+      </label>
+    </ons-list-item>
+    <ons-list-item tappable>
+      <label class="left">
+        <ons-input name="color" type="radio" id="state2" name="level" input-id="radio-2"></ons-input>
+      </label>
+      <label for="radio-2" class="center">
+        RTAM
+      </label>
+    </ons-list-item>
+  </ons-list>
+        
+        
+        
+        
+			<ons-button id="insert" class="btn_large_moj" modifier="large" onclick="insertuser()"> Rejestracja </ons-button> <br /> <br />
+			<ons-button class="btn_large_moj" modifier="large" onclick="menu.setMainPage('login.html', {closeMenu: true})"> Strona Logowania </ons-button>
+		</div>
+	</ons-page>
+</ons-template>
+<!-- ***************************************************Show photo wholesale ***************************************************************************************** -->
+<ons-template id="show_wholesale_photos.html">
+    <ons-page id="my-page" ng-controller="PageController">
+        <ons-toolbar>
+            <div class="left">
+                <ons-toolbar-button ng-click="menu.toggle()">
+                    <ons-icon icon="ion-navicon" size="28px" fixed-width="false"></ons-icon>
+                </ons-toolbar-button>
+            </div>
+            <div class="center">Galeria</div>
+        </ons-toolbar>    
+		<div class="center4">	
+		<h3>Wybierz odpowiednie filtry i przeglądaj zdjęcia</h3>
+	    <div class="row">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width: 100px;">
+		                <ons-input onclick="select_wholesale()" id="select_wholesale" type="checkbox"  />
+		                <label style="margin: 0;" for="select_wholesale">Hurtownia: </label>
+                    </span>
+                    <select class="select_wholesale_options" id="select_wholesale_options" style="width: 100%; height: 50px;"></select>
+                </div>
+	        </div>
+            <br/>
+	        <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width: 140px;">
+		                <ons-input style="margin: 0;" onclick="select_RTAM()" id="select_RTAM" type="checkbox"  />
+		                <label style="margin: 0;" for="select_RTAM">RTAM: </label>
+                     </span>
+                    <select class="select_RTAM_options" id="select_RTAM_options" style="width: 100%; height: 50px;"></select>
+                </div>
+	        </div>
+            <br/>
+	        <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon" style="width: 140px;">
+		                <label style="margin: 0;">Rodzaj: </label>
+                    </span>
+                    <select class="select_kind_options" id="select_kind_options" style="width: 100%; height: 50px;">
+				        <option>Półka</option>
+				        <option>Oddział</option>
+				        <option selected>Wszystko</option>
+				    </select>
+                </div>
+	        </div>
+	    </div>
+    <ons-button modifier="large" ng-click="loadPeople()"><ons-icon icon="ion-ios-photos-outline"></ons-icon>&nbsp; Pokaż zdjęcia</ons-button>
+	<br />
+	<hr></hr>
+    <ul class="gallery gallery1">
+        <li ng-repeat="image in images">
+            <a ng-click="openLightboxModal($index)">
+                <img ng-src="{{image.url}}" class="img-thumbnail" style="width: 300px; height: 200px;">
+                <figcaption class="figure-caption text-xs-right">{{image.caption}}</figcaption>   
+            </a>
+        </li>
+    </ul>
+    <div>   
+    </ons-page>
+</ons-template>
+</body>
+</html>
